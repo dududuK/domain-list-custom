@@ -35,6 +35,7 @@ jobs:
           echo "ai2=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Copilot/Copilot.list" >> $GITHUB_ENV
           echo "ai3=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Gemini/Gemini.list" >> $GITHUB_ENV
           echo "ai4=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Claude/Claude.list" >> $GITHUB_ENV
+          echo "ai5=https://raw.githubusercontent.com/dler-io/Rules/refs/heads/main/Clash/Provider/AI%20Suite.yaml" >> $GITHUB_ENV
           echo "networktest=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Speedtest/Speedtest.list" >> $GITHUB_ENV
           echo "proxy=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global.list" >> $GITHUB_ENV
           echo "cn=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax.list" >> $GITHUB_ENV
@@ -178,7 +179,19 @@ jobs:
           curl -sSL ${ai2} | grep -Ev '#|IP-' >> ./tmp/temp-ai.txt
           curl -sSL ${ai3} | grep -Ev '#|IP-' >> ./tmp/temp-ai.txt
           curl -sSL ${ai4} | grep -Ev '#|IP-' >> ./tmp/temp-ai.txt
-          sort --ignore-case -u ./tmp/temp-ai.txt > ./domains/ai.list
+          curl -sSL ${ai5} | grep -Ev '#|payload:' | sed -e '/^\s*$/d' -e "s/'$//" -e 's/^[ \t]*//' -e 's/^- //g' | sort --ignore-case >> ./tmp/temp-ai-suffix.txt
+
+
+      - name: Generate proxy
+        run: |
+          chmod +x ./gfwlist2dnsmasq/gfwlist2dnsmasq.sh
+          ./gfwlist2dnsmasq/gfwlist2dnsmasq.sh -l -o ./tmp/temp-proxy-suffix.txt
+          grep '^domain:' ./publish/geolocation-\!cn.txt | sed -e 's/^domain://' -e 's/:@\!cn$//' >> ./tmp/temp-proxy-suffix.txt
+          curl -sSL ${proxy} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxy-suffix.txt
+
+          grep -v '^domain:' ./publish/geolocation-\!cn.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' -e 's/:@\!cn$//' > ./tmp/temp-proxy-other.txt
+          curl -sSL ${proxy} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxy-other.txt
+
 
       - name: Generate networktest
         run: |
@@ -198,15 +211,6 @@ jobs:
         run: |
           sed 's/^domain:/DOMAIN-SUFFIX,/' ./publish/tld-\!cn.txt | sort --ignore-case > ./domains/tld-proxy.list
 
-      - name: Generate proxy
-        run: |
-          chmod +x ./gfwlist2dnsmasq/gfwlist2dnsmasq.sh
-          ./gfwlist2dnsmasq/gfwlist2dnsmasq.sh -l -o ./tmp/temp-proxy-suffix.txt
-          grep '^domain:' ./publish/geolocation-\!cn.txt | sed -e 's/^domain://' -e 's/:@\!cn$//' >> ./tmp/temp-proxy-suffix.txt
-          curl -sSL ${proxy} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxy-suffix.txt
-
-          grep -v '^domain:' ./publish/geolocation-\!cn.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' -e 's/:@\!cn$//' > ./tmp/temp-proxy-other.txt
-          curl -sSL ${proxy} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxy-other.txt
 
       - name: Generate tld-cn
         run: |
@@ -223,7 +227,7 @@ jobs:
       - name: Domain name deduplication
         run: |
           chmod +x ./tools/deduplication.py ./tools/filter.sh
-          rules=(fakeip-filter private games-cn networktest proxy cn)
+          rules=(fakeip-filter private games-cn networktest proxy cn ai)
           for rule in "${rules[@]}"; do
             ./tools/deduplication.py "./tmp/temp-${rule}-suffix.txt" "./tmp/${rule}-deleted-unsort-suffix.txt"
             [ ! -f "./tmp/${rule}-deleted-unsort-suffix.txt" ] && touch "./tmp/${rule}-deleted-unsort-suffix.txt"
