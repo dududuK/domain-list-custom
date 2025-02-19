@@ -175,12 +175,18 @@ jobs:
 
       - name: Generate ai
         run: |
-          curl -sSL ${ai1} | grep -Ev '#|IP-' > ./tmp/temp-ai.txt
-          curl -sSL ${ai2} | grep -Ev '#|IP-' >> ./tmp/temp-ai.txt
-          curl -sSL ${ai3} | grep -Ev '#|IP-' >> ./tmp/temp-ai.txt
-          curl -sSL ${ai4} | grep -Ev '#|IP-' >> ./tmp/temp-ai.txt
-          curl -sSL ${ai5} | grep -Ev '#|payload:' | sed -e '/^\s*$/d' -e "s/'$//" -e 's/^[ \t]*//' -e 's/^- //g' | sort --ignore-case >> ./tmp/temp-ai-suffix.txt
+          curl -sSL ${ai1} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
+          curl -sSL ${ai2} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
+          curl -sSL ${ai3} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
+          curl -sSL ${ai4} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
+          curl -sSL ${ai5} | grep 'DOMAIN-SUFFIX,' | sed 's/^\s*-\s*DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./temp-ai-suffix.txt
 
+
+          curl -sSL ${ai1} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-other.txt
+          curl -sSL ${ai2} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-other.txt
+          curl -sSL ${ai3} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-other.txt
+          curl -sSL ${ai4} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-other.txt
+          curl -sSL ${ai5} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sed 's/^\s*-\s*DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./temp-ai-other.txt
 
       - name: Generate proxy
         run: |
