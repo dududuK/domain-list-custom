@@ -213,7 +213,7 @@ jobs:
           curl -sSL ${proxylite4} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxylite-suffix.txt
           curl -sSL ${proxylite5} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxylite-suffix.txt
 
-          curl -sSL ${proxylite1} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
+          curl -sSL ${proxylite1} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u > ./tmp/temp-proxylite-other.txt
           curl -sSL ${proxylite2} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
           curl -sSL ${proxylite3} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
           curl -sSL ${proxylite4} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
