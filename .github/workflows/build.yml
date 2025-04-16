@@ -264,11 +264,10 @@ jobs:
             [ ! -f "./tmp/${rule}-deleted-unsort-suffix.txt" ] && touch "./tmp/${rule}-deleted-unsort-suffix.txt"
             sort --ignore-case "./tmp/${rule}-deleted-unsort-suffix.txt" > "./tmp/${rule}-deleted-sort-suffix.txt"
             diff "./tmp/${rule}-deleted-sort-suffix.txt" "./tmp/temp-${rule}-suffix.txt" | awk '/^>/{print $2}' | sed 's/^/DOMAIN-SUFFIX,/' > "./tmp/${rule}-without-redundant-suffix.txt"
-
             cat "./tmp/temp-${rule}-other.txt" "./tmp/${rule}-without-redundant-suffix.txt" | sort --ignore-case -u > "./tmp/${rule}-redundant.txt"
-            sort --ignore-case -u "./tmp/${rule}-redundant.txt" -o "./tmp/${rule}-redundant.txt"
-            
-            ./tools/filter.sh "./tmp/${rule}-redundant.txt" > "./domains/${rule}.list"
+            sort --ignore-case -u "./tmp/${rule}-redundant.txt" > "./tmp/${rule}-redundantR.txt"
+            ./tools/filter.sh "./tmp/${rule}-redundantR.txt" > "./domains/${rule}.list"
+
           done
           rm -rf ./tmp* ./publish*
 
