@@ -190,14 +190,14 @@ jobs:
           curl -sSL ${ai4} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
           curl -sSL "${ai5}" | grep -E '^\s*-\s*DOMAIN-SUFFIX,' | sed 's/^\s*-\s*DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
           curl -sSL "${ai6}" | grep -Ev '^\s*$|#' | sed 's/\+\.//g' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
-          #curl -sSL "${ai7}" | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
+          curl -sSL "${ai7}" | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
           
           curl -sSL ${ai1} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u > ./tmp/temp-ai-other.txt
           curl -sSL ${ai2} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
           curl -sSL ${ai3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
           curl -sSL ${ai4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
           curl -sSL "${ai5}" | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' | sed 's/^\s*-\s*//' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
-          #curl -sSL "${ai7}" | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
+          curl -sSL "${ai7}" | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
    
       - name: Generate proxy
         run: |
@@ -260,9 +260,10 @@ jobs:
           chmod +x ./tools/deduplication.py ./tools/filter.sh
           rules=(ai fakeip-filter private games-cn networktest proxy cn  proxylite)
           for rule in "${rules[@]}"; do
+           
             ./tools/deduplication.py "./tmp/temp-${rule}-suffix.txt" "./tmp/${rule}-deleted-unsort-suffix.txt"
             [ ! -f "./tmp/${rule}-deleted-unsort-suffix.txt" ] && touch "./tmp/${rule}-deleted-unsort-suffix.txt"
-            sort --ignore-case "./tmp/${rule}-deleted-unsort-suffix.txt" > "./tmp/${rule}-deleted-sort-suffix.txt"
+            sort --ignore-case -u "./tmp/${rule}-deleted-unsort-suffix.txt" > "./tmp/${rule}-deleted-sort-suffix.txt"
             diff "./tmp/${rule}-deleted-sort-suffix.txt" "./tmp/temp-${rule}-suffix.txt" | awk '/^>/{print $2}' | sed 's/^/DOMAIN-SUFFIX,/' > "./tmp/${rule}-without-redundant-suffix.txt"
             cat "./tmp/temp-${rule}-other.txt" "./tmp/${rule}-without-redundant-suffix.txt" | sort --ignore-case -u > "./tmp/${rule}-redundant.txt"
             ./tools/filter.sh "./tmp/${rule}-redundant.txt" > "./domains/${rule}.list"
