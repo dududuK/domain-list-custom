@@ -266,7 +266,7 @@ jobs:
       
             # ✅ 第二步：执行子域冗余剔除，输出冗余子域（被删掉的）
             ./tools/deduplication.py "./tmp/${rule}-deduped-suffix.txt" "./tmp/${rule}-redundant-only.txt"
-      
+            [ ! -f "./tmp/${rule}-redundant-only.txt" ] && touch "./tmp/${rule}-redundant-only.txt"
             # ✅ 第三步：从原始 deduped 中减去冗余子域，得到非冗余的域
             grep -Fvx -f "./tmp/${rule}-redundant-only.txt" "./tmp/${rule}-deduped-suffix.txt" > "./tmp/${rule}-without-redundant-suffix.txt"
       
