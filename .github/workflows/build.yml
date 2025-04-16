@@ -197,7 +197,7 @@ jobs:
           curl -sSL ${ai3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
           curl -sSL ${ai4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
           curl -sSL "${ai5}" | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' | sed 's/^\s*-\s*//' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
-          curl -sSL ${ai7} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
+          curl -sSL ${ai7} | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
    
       - name: Generate proxy
         run: |
