@@ -35,4 +35,5 @@ END {
         }
     }
 }
-' "$input_file"
+' "$input_file" | sort --ignore-case -u
+
