@@ -258,43 +258,19 @@ jobs:
       - name: Domain name deduplication
         run: |
           chmod +x ./tools/deduplication.py ./tools/filter.sh
-          rules=(ai fakeip-filter private games-cn networktest proxy cn proxylite)
-      
+          rules=(ai fakeip-filter private games-cn networktest proxy cn  proxylite)
           for rule in "${rules[@]}"; do
-            # ✅ 第一步：对原始 suffix 文件进行行去重（忽略大小写）
-            sort --ignore-case -u "./tmp/temp-${rule}-suffix.txt" > "./tmp/${rule}-deduped-suffix.txt"
-      
-            # ✅ 第二步：执行子域冗余剔除，输出冗余子域（被删掉的）
-            ./tools/deduplication.py "./tmp/${rule}-deduped-suffix.txt" "./tmp/${rule}-redundant-only.txt"
-            [ ! -f "./tmp/${rule}-redundant-only.txt" ] && touch "./tmp/${rule}-redundant-only.txt"
-            # ✅ 第三步：从原始 deduped 中减去冗余子域，得到非冗余的域
-            grep -Fvx -f "./tmp/${rule}-redundant-only.txt" "./tmp/${rule}-deduped-suffix.txt" > "./tmp/${rule}-without-redundant-suffix.txt"
-      
-            # ✅ 第四步：合并 other 域名，整体再去重（确保最终唯一）
-            cat "./tmp/temp-${rule}-other.txt" "./tmp/${rule}-without-redundant-suffix.txt" \
-              | sort --ignore-case -u > "./tmp/${rule}-final.txt"
-      
-            # ✅ 第五步：调用 filter.sh 生成最终的 list 文件
-            ./tools/filter.sh "./tmp/${rule}-final.txt" > "./domains/${rule}.list"
+            ./tools/deduplication.py "./tmp/temp-${rule}-suffix.txt" "./tmp/${rule}-deleted-unsort-suffix.txt"
+            [ ! -f "./tmp/${rule}-deleted-unsort-suffix.txt" ] && touch "./tmp/${rule}-deleted-unsort-suffix.txt"
+            sort --ignore-case "./tmp/${rule}-deleted-unsort-suffix.txt" > "./tmp/${rule}-deleted-sort-suffix.txt"
+            diff "./tmp/${rule}-deleted-sort-suffix.txt" "./tmp/temp-${rule}-suffix.txt" | awk '/^>/{print $2}' | sed 's/^/DOMAIN-SUFFIX,/' > "./tmp/${rule}-without-redundant-suffix.txt"
+
+            cat "./tmp/temp-${rule}-other.txt" "./tmp/${rule}-without-redundant-suffix.txt" | sort --ignore-case -u > "./tmp/${rule}-redundant.txt"
+            sort --ignore-case -u "./tmp/${rule}-redundant.txt" -o "./tmp/${rule}-redundant.txt"
+            
+            ./tools/filter.sh "./tmp/${rule}-redundant.txt" > "./domains/${rule}.list"
           done
-      
           rm -rf ./tmp* ./publish*
-
-      # - name: Domain name deduplication
-      #   run: |
-      #     chmod +x ./tools/deduplication.py ./tools/filter.sh
-      #     rules=(ai fakeip-filter private games-cn networktest proxy cn  proxylite)
-      #     for rule in "${rules[@]}"; do
-      #       ./tools/deduplication.py "./tmp/temp-${rule}-suffix.txt" "./tmp/${rule}-deleted-unsort-suffix.txt"
-      #       [ ! -f "./tmp/${rule}-deleted-unsort-suffix.txt" ] && touch "./tmp/${rule}-deleted-unsort-suffix.txt"
-      #       sort --ignore-case "./tmp/${rule}-deleted-unsort-suffix.txt" > "./tmp/${rule}-deleted-sort-suffix.txt"
-      #       diff "./tmp/${rule}-deleted-sort-suffix.txt" "./tmp/temp-${rule}-suffix.txt" | awk '/^>/{print $2}' | sed 's/^/DOMAIN-SUFFIX,/' > "./tmp/${rule}-without-redundant-suffix.txt"
-
-      #       cat "./tmp/temp-${rule}-other.txt" "./tmp/${rule}-without-redundant-suffix.txt" | sort --ignore-case -u > "./tmp/${rule}-redundant.txt"
-
-      #       ./tools/filter.sh "./tmp/${rule}-redundant.txt" > "./domains/${rule}.list"
-      #     done
-      #     rm -rf ./tmp* ./publish*
 
       - name: Release and upload `domains` assets
         uses: svenstaro/upload-release-action@v2
