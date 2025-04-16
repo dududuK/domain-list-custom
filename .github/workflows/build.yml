@@ -259,31 +259,16 @@ jobs:
         run: |
           chmod +x ./tools/deduplication.py ./tools/filter.sh
           rules=(ai fakeip-filter private games-cn networktest proxy cn proxylite)
-      
           for rule in "${rules[@]}"; do
-            # 1. 运行冗余检测脚本，输出待删除项
             ./tools/deduplication.py "./tmp/temp-${rule}-suffix.txt" "./tmp/${rule}-deleted-unsort-suffix.txt"
-      
-            # 2. 若输出文件不存在，补一个空文件
             [ ! -f "./tmp/${rule}-deleted-unsort-suffix.txt" ] && touch "./tmp/${rule}-deleted-unsort-suffix.txt"
-      
-            # 3. ✅ 对 deduplication 输出进行去重（覆盖）
-            sort --ignore-case -u "./tmp/${rule}-deleted-unsort-suffix.txt" -o "./tmp/${rule}-deleted-unsort-suffix.txt"
-      
-            # 4. diff 出剩余的非冗余内容（即去掉被 deduplication 标记的）
-            diff "./tmp/${rule}-deleted-unsort-suffix.txt" "./tmp/temp-${rule}-suffix.txt" \
-              | awk '/^>/{print $2}' \
-              | sed 's/^/DOMAIN-SUFFIX,/' > "./tmp/${rule}-without-redundant-suffix.txt"
-      
-            # 5. 合并其他部分 + 去冗余部分，并统一再去重一次
-            cat "./tmp/temp-${rule}-other.txt" "./tmp/${rule}-without-redundant-suffix.txt" \
-              | sort --ignore-case -u > "./tmp/${rule}-redundant.txt"
-      
-            # 6. 过滤成最终输出（如有其他过滤逻辑）
+            sort --ignore-case "./tmp/${rule}-deleted-unsort-suffix.txt" > "./tmp/${rule}-deleted-sort-suffix.txt"
+            diff "./tmp/${rule}-deleted-sort-suffix.txt" "./tmp/temp-${rule}-suffix.txt" | awk '/^>/{print $2}' | sed 's/^/DOMAIN-SUFFIX,/' > "./tmp/${rule}-without-redundant-suffix.txt"
+
+            cat "./tmp/temp-${rule}-other.txt" "./tmp/${rule}-without-redundant-suffix.txt" | sort --ignore-case -u > "./tmp/${rule}-redundant.txt"
+
             ./tools/filter.sh "./tmp/${rule}-redundant.txt" > "./domains/${rule}.list"
           done
-      
-          # 7. 清理临时文件
           rm -rf ./tmp* ./publish*
 
       - name: Release and upload `domains` assets
