@@ -266,12 +266,11 @@ jobs:
             sort --ignore-case "./tmp/${rule}-deleted-unsort-suffix.txt" > "./tmp/${rule}-deleted-sort-suffix.txt"
             diff "./tmp/${rule}-deleted-sort-suffix.txt" "./tmp/temp-${rule}-suffix.txt" | awk '/^>/{print $2}' | sed 's/^/DOMAIN-SUFFIX,/' > "./tmp/${rule}-without-redundant-suffix.txt"
       
-            # 清理输入文件：移除空行、规范化格式
+            # 清理输入文件并去重，保留原始大小写
             cat "./tmp/temp-${rule}-other.txt" "./tmp/${rule}-without-redundant-suffix.txt" | \
               sed '/^[[:space:]]*$/d' | \
               sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | \
-              awk -F',' '{print tolower($0)}' | \
-              sort --ignore-case -u > "./tmp/${rule}-redundant.txt"
+              sort -u > "./tmp/${rule}-redundant.txt"
       
             # 验证去重结果（可选调试）
             echo "Checking duplicates in ./tmp/${rule}-redundant.txt:"
