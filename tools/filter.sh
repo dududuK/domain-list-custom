@@ -1,29 +1,23 @@
 #!/bin/bash
 
-input_file="$1"
+input_file=$1
 
 awk -F ',' '
 {
     lines[NR] = $0
-    type = $1
-    value = $2
-
-    if (type == "DOMAIN-SUFFIX") {
-        suffix_set[value] = 1
+    if ($1 == "DOMAIN-SUFFIX") {
+        suffix_set[$2] = 1
     }
 }
 END {
     for (i = 1; i <= NR; i++) {
         line = lines[i]
-        split(line, parts, /,/)
-        type = parts[1]
-        value = parts[2]
-
-        if (type == "DOMAIN-SUFFIX") {
+        if (line ~ /^DOMAIN-SUFFIX,/) {
             print line
-        } else if (type == "DOMAIN") {
-            # Check if domain is already covered by DOMAIN-SUFFIX
-            n = split(value, arr, ".")
+        } else if (line ~ /^DOMAIN,/) {
+            split(line, parts, /,/)
+            domain = parts[2]
+            n = split(domain, arr, ".")
             found = 0
             for (j = 1; j <= n; j++) {
                 parent = arr[j]
@@ -41,4 +35,4 @@ END {
         }
     }
 }
-' "$input_file" | sort -fu
+' "$input_file"
