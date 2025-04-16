@@ -37,6 +37,8 @@ jobs:
           echo "ai4=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Claude/Claude.list" >> $GITHUB_ENV
           echo 'ai5=https://raw.githubusercontent.com/dler-io/Rules/refs/heads/main/Clash/Provider/AI%20Suite.yaml' >> $GITHUB_ENV
           echo 'ai6=https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-ai-chat-!cn.list' >> $GITHUB_ENV
+          echo 'ai7=https://raw.githubusercontent.com/lunartrees/My-Clash-Rules/refs/heads/main/AI.list' >> $GITHUB_ENV
+          
           echo "networktest=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Speedtest/Speedtest.list" >> $GITHUB_ENV
           echo "proxy=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global.list" >> $GITHUB_ENV
           echo "proxylite1=https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ProxyGFWlist.list" >> $GITHUB_ENV
@@ -188,12 +190,14 @@ jobs:
           curl -sSL ${ai4} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
           curl -sSL "${ai5}" | grep -E '^\s*-\s*DOMAIN-SUFFIX,' | sed 's/^\s*-\s*DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
           curl -sSL ${ai6} | grep -Ev '^\s*$|#' | sed 's/\+\.//g' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
+          curl -sSL ${ai7} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
           
           curl -sSL ${ai1} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u > ./tmp/temp-ai-other.txt
           curl -sSL ${ai2} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
           curl -sSL ${ai3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
           curl -sSL ${ai4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
-          curl -sSL "${ai5}" | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' | sed 's/^\s*-\s*//' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt  
+          curl -sSL "${ai5}" | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' | sed 's/^\s*-\s*//' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
+          curl -sSL ${ai7} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
    
       - name: Generate proxy
         run: |
