@@ -293,7 +293,7 @@ jobs:
       - name: Domain name deduplication
         run: |
           chmod +x ./tools/deduplication.py ./tools/filter.sh
-          rules=(fakeip-filter applications private ads microsoft-cn apple-cn google-cn games-cn netflix disney max primevideo appletv youtube tiktok bilibili ai proxy proxylite)
+          rules=(fakeip-filter games-cn private netflix disney max primevideo appletv youtube tiktok bilibili ai proxy proxylite)
           for rule in "${rules[@]}"; do
             ./tools/deduplication.py "./tmp/temp-${rule}-suffix.txt" "./tmp/${rule}-deleted-unsort-suffix.txt"
             [ ! -f "./tmp/${rule}-deleted-unsort-suffix.txt" ] && touch "./tmp/${rule}-deleted-unsort-suffix.txt"
