@@ -152,35 +152,69 @@ jobs:
 
       - name: Generate netflix
         run: |
-          curl -sSL ${netflix} | grep -Ev '#|IP-' | sort --ignore-case > ./domains/netflix.list
+          grep '^domain:' ./publish/netflix.txt | sed 's/^domain://' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-netflix-suffix.txt
+          curl -sSL ${netflix} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-netflix-suffix.txt
+
+          grep -v '^domain:' ./publish/netflix.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-netflix-other.txt
+          curl -sSL ${netflix} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-netflix-other.txt
 
       - name: Generate disney
         run: |
-          curl -sSL ${disney} | grep -Ev '#|IP-' | sort --ignore-case > ./domains/disney.list
+          grep '^domain:' ./publish/disney.txt | sed 's/^domain://' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-disney-suffix.txt
+          curl -sSL ${disney} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-disney-suffix.txt
+
+          grep -v '^domain:' ./publish/disney.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-disney-other.txt
+          curl -sSL ${disney} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-disney-other.txt
 
       - name: Generate max
         run: |
-          curl -sSL ${max} | grep -Ev '#|IP-' | sort --ignore-case > ./domains/max.list
+          grep '^domain:' ./publish/hbo.txt | sed 's/^domain://' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-max-suffix.txt
+          curl -sSL ${max} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-max-suffix.txt
+
+          grep -v '^domain:' ./publish/hbo.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-max-other.txt
+          curl -sSL ${max} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-max-other.txt
 
       - name: Generate primevideo
         run: |
-          curl -sSL ${primevideo} | grep -Ev '#|IP-' | sort --ignore-case > ./domains/primevideo.list
+          grep '^domain:' ./publish/primevideo.txt | sed 's/^domain://' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-primevideo-suffix.txt
+          curl -sSL ${primevideo} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-primevideo-suffix.txt
 
+          grep -v '^domain:' ./publish/primevideo.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-primevideo-other.txt
+          curl -sSL ${primevideo} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-primevideo-other.txt
+
+          
       - name: Generate appletv
         run: |
-          curl -sSL ${appletv} | grep -Ev '#|IP-' | sort --ignore-case > ./domains/appletv.list
+          grep '^domain:' ./publish/apple-tvplus.txt | sed 's/^domain://' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-appletv-suffix.txt
+          curl -sSL ${appletv} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-appletv-suffix.txt
+
+          grep -v '^domain:' ./publish/apple-tvplus.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-appletv-other.txt
+          curl -sSL ${appletv} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-appletv-other.txt
 
       - name: Generate youtube
         run: |
-          curl -sSL ${youtube} | grep -Ev '#|IP-' | sort --ignore-case > ./domains/youtube.list
+          grep '^domain:' ./publish/youtube.txt | sed 's/^domain://' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-youtube-suffix.txt
+          curl -sSL ${youtube} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-youtube-suffix.txt
+
+          grep -v '^domain:' ./publish/youtube.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-youtube-other.txt
+          curl -sSL ${youtube} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-youtube-other.txt
 
       - name: Generate tiktok
         run: |
-          curl -sSL ${tiktok} | grep -Ev '#|IP-' | sort --ignore-case > ./domains/tiktok.list
+          grep '^domain:' ./publish/tiktok.txt | sed 's/^domain://' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-tiktok-suffix.txt
+          curl -sSL ${tiktok} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-tiktok-suffix.txt
+
+          grep -v '^domain:' ./publish/tiktok.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-tiktok-other.txt
+          curl -sSL ${tiktok} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-tiktok-other.txt
 
       - name: Generate bilibili
         run: |
-          curl -sSL ${bilibili} | grep -Ev '#|IP-' | sort --ignore-case > ./domains/bilibili.list
+          grep '^domain:' ./publish/bilibili.txt | sed 's/^domain://' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-bilibili-suffix.txt
+          curl -sSL ${bilibili} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-bilibili-suffix.txt
+
+          grep -v '^domain:' ./publish/bilibili.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-bilibili-other.txt
+          curl -sSL ${bilibili} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-bilibili-other.txt
+
 
       - name: Generate ai
         run: |
@@ -259,7 +293,7 @@ jobs:
       - name: Domain name deduplication
         run: |
           chmod +x ./tools/deduplication.py ./tools/filter.sh
-          rules=(ai fakeip-filter private games-cn networktest proxy cn proxylite)
+          rules=(fakeip-filter fakeip-filter-lite applications private ads microsoft-cn apple-cn google-cn games-cn netflix disney max primevideo appletv youtube tiktok bilibili ai proxy proxylite)
           for rule in "${rules[@]}"; do
             ./tools/deduplication.py "./tmp/temp-${rule}-suffix.txt" "./tmp/${rule}-deleted-unsort-suffix.txt"
             [ ! -f "./tmp/${rule}-deleted-unsort-suffix.txt" ] && touch "./tmp/${rule}-deleted-unsort-suffix.txt"
