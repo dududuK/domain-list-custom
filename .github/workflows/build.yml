@@ -265,7 +265,7 @@ jobs:
 
       - name: Generate networktest
         run: |
-          grep '^domain:' ./publish/speedtest.txt | sed -e 's/^domain://' > ./tmp/temp-networktest-suffix.txt
+          grep '^domain:' ./publish/speedtest.txt | sed 's/^domain://' | sed -E 's/:@(cn|!cn)$//' > ./tmp/temp-networktest-suffix.txt
           curl -sSL ${networktest} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-networktest-suffix.txt
 
           cat <<EOF > ./tmp/temp-networktest-other.txt
@@ -274,7 +274,7 @@ jobs:
           DOMAIN-KEYWORD,test-ipv6
           DOMAIN-KEYWORD,testipv6
           EOF
-          grep -v '^domain:' ./publish/speedtest.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' >> ./tmp/temp-networktest-other.txt
+          grep -v '^domain:' ./publish/speedtest.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' | sed -E 's/:@(cn|!cn)$//' >> ./tmp/temp-networktest-other.txt
           curl -sSL ${networktest} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-networktest-other.txt
 
       - name: Generate tld-proxy
@@ -298,7 +298,7 @@ jobs:
       - name: Domain name deduplication
         run: |
           chmod +x ./tools/deduplication.py ./tools/filter.sh
-          rules=(fakeip-filter games-cn private netflix disney max primevideo appletv youtube tiktok bilibili ai proxy proxylite)
+          rules=(fakeip-filter games-cn private netflix disney max primevideo appletv youtube tiktok bilibili ai proxy proxylite networktest)
           for rule in "${rules[@]}"; do
             ./tools/deduplication.py "./tmp/temp-${rule}-suffix.txt" "./tmp/${rule}-deleted-unsort-suffix.txt"
             [ ! -f "./tmp/${rule}-deleted-unsort-suffix.txt" ] && touch "./tmp/${rule}-deleted-unsort-suffix.txt"
