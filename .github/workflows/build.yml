@@ -38,7 +38,8 @@ jobs:
           echo 'ai5=https://raw.githubusercontent.com/dler-io/Rules/refs/heads/main/Clash/Provider/AI%20Suite.yaml' >> $GITHUB_ENV
           echo 'ai6=https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-ai-chat-!cn.list' >> $GITHUB_ENV
           echo 'ai7=https://raw.githubusercontent.com/lunartrees/My-Clash-Rules/refs/heads/main/AI.list' >> $GITHUB_ENV
-          
+          echo "trackerslist1=https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt" >> $GITHUB_ENV
+          echo "trackerslist2=https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt" >> $GITHUB_ENV
           echo "networktest=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Speedtest/Speedtest.list" >> $GITHUB_ENV
           echo "proxy=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global.list" >> $GITHUB_ENV
           echo "proxylite1=https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ProxyGFWlist.list" >> $GITHUB_ENV
@@ -122,6 +123,12 @@ jobs:
           grep -v '^domain:' ./publish/private.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' >> ./tmp/temp-private-other.txt
           curl -sSL ${private1} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' >> ./tmp/temp-private-other.txt
           curl -sSL ${private2} | grep -i '\.[A-Z]' | awk -F'[/:]' '{print $4}' | sed 's/^/DOMAIN,/' | sort --ignore-case -u >> ./tmp/temp-private-other.txt
+          
+      - name: Generate trackerslist
+        run: |
+          curl -sSL ${trackerslist1} | grep -i '\.[A-Z]' | awk -F'[/:]' '{print $4}' | sed 's/^/DOMAIN,/' > ./tmp/temp-trackerslist.txt
+          curl -sSL ${trackerslist2} | grep -i '\.[A-Z]' | awk -F'[/:]' '{print $4}' | sed 's/^/DOMAIN,/' >> ./tmp/temp-trackerslist.txt
+          sort --ignore-case -u ./tmp/temp-trackerslist.txt > ./domains/trackerslist.list
 
       - name: Generate ads
         run: |
