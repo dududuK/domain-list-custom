@@ -18,8 +18,9 @@ jobs:
           echo "fakeip_filter=https://raw.githubusercontent.com/juewuy/ShellCrash/dev/public/fake_ip_filter.list" >> $GITHUB_ENV
           echo "applications1=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Download/Download.list" >> $GITHUB_ENV
           echo "applications2=https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/applications.txt" >> $GITHUB_ENV
-          echo "private1=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Lan/Lan.list" >> $GITHUB_ENV
-          echo "private2=https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt" >> $GITHUB_ENV
+          echo "private=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Lan/Lan.list" >> $GITHUB_ENV
+          echo "trackerslist1=https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt" >> $GITHUB_ENV
+          echo "trackerslist2=https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt" >> $GITHUB_ENV
           echo "ads=https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-clash.yaml" >> $GITHUB_ENV
           echo "games_cn1=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/SteamCN/SteamCN.list" >> $GITHUB_ENV
           echo "games_cn2=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/GameDownloadCN/GameDownloadCN.list" >> $GITHUB_ENV
@@ -38,8 +39,7 @@ jobs:
           echo 'ai5=https://raw.githubusercontent.com/dler-io/Rules/refs/heads/main/Clash/Provider/AI%20Suite.yaml' >> $GITHUB_ENV
           echo 'ai6=https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-ai-chat-!cn.list' >> $GITHUB_ENV
           echo 'ai7=https://raw.githubusercontent.com/lunartrees/My-Clash-Rules/refs/heads/main/AI.list' >> $GITHUB_ENV
-          echo "trackerslist1=https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt" >> $GITHUB_ENV
-          echo "trackerslist2=https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt" >> $GITHUB_ENV
+
           echo "networktest=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Speedtest/Speedtest.list" >> $GITHUB_ENV
           echo "proxy=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global.list" >> $GITHUB_ENV
           echo "proxylite1=https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ProxyGFWlist.list" >> $GITHUB_ENV
@@ -101,16 +101,16 @@ jobs:
           curl -sSL ${fakeip_filter} | grep -E 'ntp|time|stun' | grep '.\*' | grep -E '\*|\+' | sed -e 's/^*/.\*/' -e 's/^+/.\+/' -e 's/^/DOMAIN-REGEX,/' >> ./tmp/temp-fakeip-filter-lite.txt
           sort --ignore-case ./tmp/temp-fakeip-filter-lite.txt > ./domains/fakeip-filter-lite.list
 
+      - name: Generate private
+        run: |
+          grep '^domain:' ./publish/private.txt | sed 's/^domain://' > ./tmp/temp-private-suffix.txt
+          curl -sSL ${private} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-private-suffix.txt
+
       - name: Generate applications
         run: |
           curl -sSL ${applications1} | grep -Ev '#|IP-' > ./tmp/temp-applications.txt
           curl -sSL ${applications2} | grep -v 'payload:' | sed -e 's/^[ \t]*- //' >> ./tmp/temp-applications.txt
           sort --ignore-case ./tmp/temp-applications.txt > ./domains/applications.list
-
-      - name: Generate private
-        run: |
-          grep '^domain:' ./publish/private.txt | sed 's/^domain://' > ./tmp/temp-private-suffix.txt
-          curl -sSL ${private1} | grep 'DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-private-suffix.txt
 
           cat <<EOF > ./tmp/temp-private-other.txt
           DOMAIN,yacd.haishan.me
@@ -121,9 +121,8 @@ jobs:
           DOMAIN,board.zash.run.place
           EOF
           grep -v '^domain:' ./publish/private.txt | sed -e 's/^full:/DOMAIN,/' -e 's/^keyword:/DOMAIN-KEYWORD,/' -e 's/^regexp:/DOMAIN-REGEX,/' >> ./tmp/temp-private-other.txt
-          curl -sSL ${private1} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' >> ./tmp/temp-private-other.txt
-          curl -sSL ${private2} | grep -i '\.[A-Z]' | awk -F'[/:]' '{print $4}' | sed 's/^/DOMAIN,/' | sort --ignore-case -u >> ./tmp/temp-private-other.txt
-          
+          curl -sSL ${private} | grep -Ev '#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-private-other.txt
+
       - name: Generate trackerslist
         run: |
           curl -sSL ${trackerslist1} | grep -i '\.[A-Z]' | awk -F'[/:]' '{print $4}' | sed 's/^/DOMAIN,/' > ./tmp/temp-trackerslist.txt
@@ -299,7 +298,7 @@ jobs:
       - name: Domain name deduplication
         run: |
           chmod +x ./tools/deduplication.py ./tools/filter.sh
-          rules=(fakeip-filter games-cn private netflix disney max primevideo appletv youtube tiktok bilibili ai proxy proxylite)
+          rules=(fakeip-filter applications trackerslist games-cn private netflix disney max primevideo appletv youtube tiktok bilibili ai proxy proxylite)
           for rule in "${rules[@]}"; do
             ./tools/deduplication.py "./tmp/temp-${rule}-suffix.txt" "./tmp/${rule}-deleted-unsort-suffix.txt"
             [ ! -f "./tmp/${rule}-deleted-unsort-suffix.txt" ] && touch "./tmp/${rule}-deleted-unsort-suffix.txt"
