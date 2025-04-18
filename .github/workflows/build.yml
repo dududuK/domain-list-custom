@@ -51,9 +51,9 @@ jobs:
           {
             "fakeip_filter": {
               "url": "https://raw.githubusercontent.com/juewuy/ShellCrash/dev/public/fake_ip_filter.list",
-              "suffix_filter": "grep -v '.\*' | grep -E '\*|\+' | sed 's/^[*+]\.//'",
-              "other_filter": "grep -Ev '#|\+|\*|Mijia' | sed 's/^/DOMAIN,/'",
-              "regex_filter": "grep '.\*' | grep -E '\*|\+' | sed -e 's/^*/.\*/' -e 's/^+/.\+/' -e 's/^/DOMAIN-REGEX,/'"
+              "suffix_filter": "grep -v '.\\*' | grep -E '\\*|\\+' | sed 's/^[\\*\\+]\\\\.//'",
+              "other_filter": "grep -Ev '#|\\+|\\*|Mijia' | sed 's/^/DOMAIN,/'",
+              "regex_filter": "grep '.\\*' | grep -E '\\*|\\+' | sed -e 's/^*\\.\\*/' -e 's/^+\\.\\+/' -e 's/^/DOMAIN-REGEX,/'"
             },
             "fakeip-filter-lite": {
               "url": "https://raw.githubusercontent.com/juewuy/ShellCrash/dev/public/fake_ip_filter.list",
@@ -65,8 +65,8 @@ jobs:
                 "DOMAIN,static.adtidy.org",
                 "DOMAIN-SUFFIX,steamcontent.com"
               ],
-              "suffix_filter": "grep -E 'ntp|time|stun' | grep -v '.\*' | grep -E '\*|\+' | sed 's/^[*+]\./DOMAIN-SUFFIX,/'",
-              "regex_filter": "grep -E 'ntp|time|stun' | grep '.\*' | grep -E '\*|\+' | sed -e 's/^*/.\*/' -e 's/^+/.\+/' -e 's/^/DOMAIN-REGEX,/'"
+              "suffix_filter": "grep -E 'ntp|time|stun' | grep -v '.\\*' | grep -E '\\*|\\+' | sed 's/^[\\*\\+]\\\\./DOMAIN-SUFFIX,/'",
+              "regex_filter": "grep -E 'ntp|time|stun' | grep '.\\*' | grep -E '\\*|\\+' | sed -e 's/^*\\.\\*/' -e 's/^+\\.\\+/' -e 's/^/DOMAIN-REGEX,/'"
             },
             "applications": {
               "urls": [
@@ -74,7 +74,7 @@ jobs:
                 "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/applications.txt"
               ],
               "suffix_filter": "grep -Ev '#|IP-'",
-              "other_filter": "grep -v 'payload:' | sed -e 's/^[ \t]*- //'"
+              "other_filter": "grep -v 'payload:' | sed -e 's/^[ \\t]*- //'"
             },
             "private": {
               "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Lan/Lan.list",
@@ -92,7 +92,7 @@ jobs:
             },
             "ads": {
               "url": "https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-clash.yaml",
-              "suffix_filter": "grep -Ev '#|payload:' | sed -e '/^\s*$/d' -e 's/'$//' -e 's/^[ \t]*//' -e 's/^- '+\./DOMAIN-SUFFIX,/' -e 's/^- '/DOMAIN,/'"
+              "suffix_filter": "grep -Ev '#|payload:' | sed -e '/^\\s*$/d' -e 's/'$//' -e 's/^[ \\t]*//' -e 's/^- '+\\\\./DOMAIN-SUFFIX,/' -e 's/^- '/DOMAIN,/'"
             },
             "microsoft-cn": {
               "file": "microsoft.txt",
@@ -221,6 +221,8 @@ jobs:
             }
           }
           EOF
+          # Validate JSON
+          jq . rules.json >/dev/null || { echo "Invalid JSON in rules.json"; exit 1; }
         shell: bash
 
       - name: Generate domain lists
