@@ -377,12 +377,14 @@ jobs:
           curl -sSL ${proxylite3} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxylite-suffix.txt
           curl -sSL ${proxylite4} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxylite-suffix.txt
           curl -sSL ${proxylite5} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxylite-suffix.txt
+          sort --ignore-case -u ./tmp/temp-proxylite-suffix.txt > ./tmp/proxylite-suffix.txt
 
           curl -sSL ${proxylite1} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u > ./tmp/temp-proxylite-other.txt
           curl -sSL ${proxylite2} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
           curl -sSL ${proxylite3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
           curl -sSL ${proxylite4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
           curl -sSL ${proxylite5} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
+          sort --ignore-case -u ./tmp/temp-proxylite-other.txt > ./tmp/proxylite-other.txt
 
 
       - name: Generate cn
@@ -409,7 +411,7 @@ jobs:
       - name: Remove redundant domains
         run: |
           chmod +x ./tools/*.py ./tools/filter.sh
-          archs=(fakeip-filter private microsoft-cn apple-cn google-cn games-cn netflix disney max primevideo appletv youtube tiktok bilibili spotify games ai networktest tld-proxy proxy cn cn-lite)
+          archs=(fakeip-filter private microsoft-cn apple-cn google-cn games-cn netflix disney max primevideo appletv youtube tiktok bilibili spotify games ai networktest tld-proxy proxy proxylite cn cn-lite)
           for arch in "${archs[@]}"; do
             python ./tools/findRedundantDomain.py "./tmp/${arch}-suffix.txt" "./tmp/${arch}-deleted-unsort-suffix.txt"
             [ ! -f "./tmp/${arch}-deleted-unsort-suffix.txt" ] && touch "./tmp/${arch}-deleted-unsort-suffix.txt"
