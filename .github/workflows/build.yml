@@ -314,8 +314,7 @@ jobs:
 
       - name: Generate ai
         run: |
-
-          # 处理 suffix 类
+          # 处理 suffix 类域名（去除DOMAIN-SUFFIX前缀）
           {
             awk -F: '/^domain:/{print $2}' ./publish/category-ai-\!cn.txt
             curl -sSL ${ai}  | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
@@ -327,7 +326,7 @@ jobs:
             curl -sSL ${ai6} | grep -Ev '^\s*$|#' | sed -nE 's/^\+\.//p'
           } | sort -fu > ./tmp/ai-suffix.txt
 
-          # 处理 other 类
+          # 处理 other 类规则（保持原格式）
           {
             awk -F: '/^full:/{print "DOMAIN,"$2}' ./publish/category-ai-\!cn.txt
             curl -sSL ${ai}  | awk '/^DOMAIN,/'
@@ -336,7 +335,8 @@ jobs:
             curl -sSL ${ai3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
             curl -sSL ${ai4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
             curl -sSL ${ai5} | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' | sed 's/^\s*-\s*//'
-            curl -sSL ${ai6} | grep -Ev '^\s*$|#' | grep -v '^\+\.'
+            # ai6中不以+.开头的规则（避免与suffix重复），添加DOMAIN,前缀
+            curl -sSL ${ai6} | grep -Ev '^\s*$|#|^\+\.' | grep -v '^[a-zA-Z0-9.-]*$' | sed 's/^/DOMAIN,/'
           } | sort -fu > ./tmp/ai-other.txt
 
 
