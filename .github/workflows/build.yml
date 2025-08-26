@@ -314,27 +314,31 @@ jobs:
 
       - name: Generate ai
         run: |
-          cat ./publish/category-ai-\!cn.txt | perl -ne '/^(domain):([^:]+)(\n$|:@.+)/ && print "$2\n"' > ./tmp/temp-ai-suffix.txt
-          curl -sSL ${ai} | awk '/^DOMAIN-SUFFIX,/' | sed 's/DOMAIN-SUFFIX,//' >> ./tmp/temp-ai-suffix.txt
-          curl -sSL ${ai1} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u > ./tmp/temp-ai-suffix.txt
-          curl -sSL ${ai2} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
-          curl -sSL ${ai3} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
-          curl -sSL ${ai4} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
-          curl -sSL "${ai5}" | grep -E '^\s*-\s*DOMAIN-SUFFIX,' | sed 's/^\s*-\s*DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
-          curl -sSL "${ai6}" | grep -Ev '^\s*$|#' | grep '^\+\.' | sed 's/^\+\.//' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
 
-          sort --ignore-case -u ./tmp/temp-ai-suffix.txt > ./tmp/ai-suffix.txt
+          # 处理 suffix 类
+          {
+            awk -F: '/^domain:/{print $2}' ./publish/category-ai-\!cn.txt
+            curl -sSL ${ai}  | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+            curl -sSL ${ai1} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+            curl -sSL ${ai2} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+            curl -sSL ${ai3} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+            curl -sSL ${ai4} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+            curl -sSL ${ai5} | sed -nE 's/^\s*-\s*DOMAIN-SUFFIX,//p'
+            curl -sSL ${ai6} | grep -Ev '^\s*$|#' | sed -nE 's/^\+\.//p'
+          } | sort -fu > ./tmp/ai-suffix.txt
 
-          cat ./publish/category-ai-\!cn.txt | perl -ne '/^(full):([^:]+)(\n$|:@.+)/ && print "DOMAIN,$2\n"' > ./tmp/temp-ai-other.txt
-          curl -sSL ${ai} | awk '/^DOMAIN,/' >> ./tmp/temp-ai-other.txt
-          curl -sSL ${ai1} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u > ./tmp/temp-ai-other.txt
-          curl -sSL ${ai2} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
-          curl -sSL ${ai3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
-          curl -sSL ${ai4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
-          curl -sSL "${ai5}" | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' | sed 's/^\s*-\s*//' |  sort --ignore-case -u >> ./tmp/temp-ai-other.txt
-          curl -sSL "${ai6}" | grep -Ev '^\s*$|#' | grep -v '^\+\.' | sort --ignore-case -u >> ./tmp/temp-ai-suffix.txt
+          # 处理 other 类
+          {
+            awk -F: '/^full:/{print "DOMAIN,"$2}' ./publish/category-ai-\!cn.txt
+            curl -sSL ${ai}  | awk '/^DOMAIN,/'
+            curl -sSL ${ai1} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+            curl -sSL ${ai2} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+            curl -sSL ${ai3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+            curl -sSL ${ai4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+            curl -sSL ${ai5} | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' | sed 's/^\s*-\s*//'
+            curl -sSL ${ai6} | grep -Ev '^\s*$|#' | grep -v '^\+\.'
+          } | sort -fu > ./tmp/ai-other.txt
 
-          sort --ignore-case -u ./tmp/temp-ai-other.txt > ./tmp/ai-other.txt
 
       - name: Generate networktest
         run: |
@@ -374,19 +378,24 @@ jobs:
 
       - name: Generate proxylite
         run: |
-          curl -sSL ${proxylite1} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u > ./tmp/temp-proxylite-suffix.txt
-          curl -sSL ${proxylite2} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxylite-suffix.txt
-          curl -sSL ${proxylite3} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxylite-suffix.txt
-          curl -sSL ${proxylite4} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxylite-suffix.txt
-          curl -sSL ${proxylite5} | grep -E '^DOMAIN-SUFFIX,' | sed 's/DOMAIN-SUFFIX,//' | sort --ignore-case -u >> ./tmp/temp-proxylite-suffix.txt
-          sort --ignore-case -u ./tmp/temp-proxylite-suffix.txt > ./tmp/proxylite-suffix.txt
 
-          curl -sSL ${proxylite1} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u > ./tmp/temp-proxylite-other.txt
-          curl -sSL ${proxylite2} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
-          curl -sSL ${proxylite3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
-          curl -sSL ${proxylite4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
-          curl -sSL ${proxylite5} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,' | sort --ignore-case -u >> ./tmp/temp-proxylite-other.txt
-          sort --ignore-case -u ./tmp/temp-proxylite-other.txt > ./tmp/proxylite-other.txt
+          # 处理 suffix 类
+          {
+            curl -sSL ${proxylite1} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+            curl -sSL ${proxylite2} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+            curl -sSL ${proxylite3} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+            curl -sSL ${proxylite4} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+            curl -sSL ${proxylite5} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+          } | sort -fu > ./tmp/proxylite-suffix.txt
+
+          # 处理 other 类
+          {
+            curl -sSL ${proxylite1} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+            curl -sSL ${proxylite2} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+            curl -sSL ${proxylite3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+            curl -sSL ${proxylite4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+            curl -sSL ${proxylite5} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+          } | sort -fu > ./tmp/proxylite-other.txt
 
 
       - name: Generate cn
