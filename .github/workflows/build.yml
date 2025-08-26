@@ -45,6 +45,8 @@ jobs:
           echo "ai4=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Claude/Claude.list" >> $GITHUB_ENV
           echo 'ai5=https://raw.githubusercontent.com/dler-io/Rules/refs/heads/main/Clash/Provider/AI%20Suite.yaml' >> $GITHUB_ENV
           echo 'ai6=https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-ai-chat-!cn.list' >> $GITHUB_ENV
+          echo 'ai7=https://raw.githubusercontent.com/shangrenxi/Rules/refs/heads/master/rules/AI.list' >> $GITHUB_ENV
+
 
           echo "networktest=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Speedtest/Speedtest.list" >> $GITHUB_ENV
           echo "proxy=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global.list" >> $GITHUB_ENV
@@ -322,6 +324,7 @@ jobs:
             curl -sSL ${ai2} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
             curl -sSL ${ai3} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
             curl -sSL ${ai4} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
+            curl -sSL ${ai7} | awk -F, '/^DOMAIN-SUFFIX,/{print $2}'
             curl -sSL ${ai5} | sed -nE 's/^\s*-\s*DOMAIN-SUFFIX,//p'
             curl -sSL ${ai6} | grep -Ev '^\s*$|#' | sed -nE 's/^\+\.//p'
           } | sort -fu > ./tmp/ai-suffix.txt
@@ -334,6 +337,7 @@ jobs:
             curl -sSL ${ai2} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
             curl -sSL ${ai3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
             curl -sSL ${ai4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+            curl -sSL ${ai7} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
             curl -sSL ${ai5} | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' | sed 's/^\s*-\s*//'
             # ai6中不以+.开头的规则（避免与suffix重复），添加DOMAIN,前缀
             curl -sSL ${ai6} | grep -Ev '^\s*$|#|^\+\.' | grep -v '^[a-zA-Z0-9.-]*$' | sed 's/^/DOMAIN,/'
