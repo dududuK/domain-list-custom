@@ -330,10 +330,15 @@ jobs:
 
           cat ./publish/tld-\!cn.txt | perl -ne '/^(full):([^:]+)(\n$|:@.+)/ && print "DOMAIN,$2\n"' > ./tmp/tld-proxy-other.txt
 
-      - name: Generate `proxy`
+      - name: Generate `gfw`
         run: |
           chmod +x ./gfwlist2dnsmasq/gfwlist2dnsmasq.sh
-          ./gfwlist2dnsmasq/gfwlist2dnsmasq.sh -l -o ./tmp/temp-proxy-suffix.txt
+          ./gfwlist2dnsmasq/gfwlist2dnsmasq.sh -l -o ./tmp/temp-gfw.txt
+          cat ./tmp/temp-gfw.txt | sed 's/^/DOMAIN-SUFFIX,/' | sort --ignore-case > ./domains/gfw.list
+
+      - name: Generate `proxy`
+        run: |
+          cp -f ./tmp/temp-gfw.txt ./tmp/temp-proxy-suffix.txt
           cat ./publish/geolocation-\!cn.txt | perl -ne '/^(domain):([^:]+)(\n$|:@.+)/ && print "$2\n"' >> ./tmp/temp-proxy-suffix.txt
           curl -sSL ${proxy} | awk '/^DOMAIN-SUFFIX,/' | sed 's/DOMAIN-SUFFIX,//' >> ./tmp/temp-proxy-suffix.txt
           sort --ignore-case -u ./tmp/temp-proxy-suffix.txt > ./tmp/proxy-suffix.txt
