@@ -338,12 +338,12 @@ jobs:
           {
             awk -F: '/^full:/{print "DOMAIN,"$2}' ./publish/category-ai-\!cn.txt
             curl -sSL ${ai}  | awk '/^DOMAIN,/'
-            curl -sSL ${ai1} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
-            curl -sSL ${ai2} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
-            curl -sSL ${ai3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
-            curl -sSL ${ai4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
-            curl -sSL ${ai7} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
-            curl -sSL ${ai5} | grep -Ev '^$|#|payload:|IP-|DOMAIN-SUFFIX,' | sed 's/^\s*-\s*//'
+            curl -sSL ${ai1} | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
+            curl -sSL ${ai2} | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
+            curl -sSL ${ai3} | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
+            curl -sSL ${ai4} | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
+            curl -sSL ${ai7} | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
+            curl -sSL ${ai5} | sed 's/^\s*-\s*//' | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
             # ai6中不以+.开头的规则（避免与suffix重复），添加DOMAIN,前缀
             curl -sSL ${ai6} | grep -Ev '^\s*$|#|^\+\.' | grep -v '^[a-zA-Z0-9.-]*$' | sed 's/^/DOMAIN,/'
           } | sort -fu > ./tmp/ai-other.txt
@@ -399,11 +399,11 @@ jobs:
 
           # 处理 other 类
           {
-            curl -sSL ${proxylite1} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
-            curl -sSL ${proxylite2} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
-            curl -sSL ${proxylite3} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
-            curl -sSL ${proxylite4} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
-            curl -sSL ${proxylite5} | grep -Ev '^$|#|IP-|DOMAIN-SUFFIX,'
+            curl -sSL ${proxylite1} | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
+            curl -sSL ${proxylite2} | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
+            curl -sSL ${proxylite3} | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
+            curl -sSL ${proxylite4} | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
+            curl -sSL ${proxylite5} | grep -Ei '^(DOMAIN|DOMAIN-KEYWORD),'
           } | sort -fu > ./tmp/proxylite-other.txt
 
 
