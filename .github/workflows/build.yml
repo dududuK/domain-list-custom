@@ -8,6 +8,11 @@ on:
       - master
     paths-ignore:
       - "**/README.md"
+
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -63,21 +68,21 @@ jobs:
         shell: bash
 
       - name: Checkout codebase
-        uses: actions/checkout@master
+        uses: actions/checkout@v7
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version-file: ./go.mod
 
       - name: Checkout v2fly/domain-list-community
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: v2fly/domain-list-community
           path: community
 
       - name: Checkout cokebar/gfwlist2dnsmasq
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: cokebar/gfwlist2dnsmasq
           path: gfwlist2dnsmasq
