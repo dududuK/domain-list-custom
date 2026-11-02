@@ -283,6 +283,7 @@ class CommunityFilter(BaseFilter):
         others: Set[str] = set()
         content = fetch_content(self.filename, context)
         if not content:
+            print(f"[INFO] '{self.filename}' 未在 '{context.publish_dir}' 中找到（在 CI 中该文件由 Go 编译 geosite 自动生成）", file=sys.stderr)
             return suffixes, others
 
         for line in content.splitlines():
@@ -294,7 +295,12 @@ class CommunityFilter(BaseFilter):
                 continue
             rule_type = parts[0].strip().lower()
             val = parts[1].strip()
-            tags = [p.strip().lstrip("@") for p in parts[2:] if p.strip()]
+            tags = set()
+            for p in parts[2:]:
+                for item in p.split(","):
+                    t = item.strip().lstrip("@")
+                    if t:
+                        tags.add(t)
 
             # 标签过滤
             if self.tag is not None:
@@ -788,14 +794,14 @@ def get_default_registry() -> RuleRegistry:
     reg.register(
         RoutingRule("apple-cn")
         .add_filter(CommunityFilter("apple.txt", tag="cn"))
-        .add_filter(DnsmasqFilter("apple_cn", as_suffix=False))
+        .add_filter(DnsmasqFilter("apple_cn", as_suffix=True))
     )
 
     # 9. google-cn
     reg.register(
         RoutingRule("google-cn")
         .add_filter(CommunityFilter("google.txt", tag="cn"))
-        .add_filter(DnsmasqFilter("google_cn", as_suffix=False))
+        .add_filter(DnsmasqFilter("google_cn", as_suffix=True))
     )
 
     # 10. games-cn
