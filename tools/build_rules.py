@@ -197,19 +197,31 @@ def eliminate_redundant_suffixes(suffixes: Iterable[str]) -> Set[str]:
 
 def filter_domain_against_suffixes(others: Iterable[str], suffixes: Set[str]) -> Set[str]:
     """
-    匹配原 filter.sh 算法：
-    若 DOMAIN,xxx 中的 xxx 本身或任何一级父域名已在 suffix_set 中，则剔除该 DOMAIN。
-    保持 DOMAIN-KEYWORD、DOMAIN-REGEX、PROCESS-NAME 等原样输出。
+    过滤算法：
+    仅保留且支持以下前缀规则：
+    1. DOMAIN（精准匹配：若自身或任何一级父域名已在 suffix_set 中，则判定冗余剔除）
+    2. DOMAIN-KEYWORD（关键字匹配）
+    3. DOMAIN-REGEX / REGEX（正则表达式匹配）
+    其它非域名类型（如 PROCESS-NAME、IP-CIDR 等）一律过滤去除。
     """
+    ALLOWED_PREFIXES = {"DOMAIN", "DOMAIN-KEYWORD", "DOMAIN-REGEX", "REGEX"}
     kept_others: Set[str] = set()
+
     for line in others:
         line = line.strip()
         if not line or line.startswith("#"):
             continue
 
         parts = line.split(",", 1)
-        if len(parts) == 2 and parts[0] == "DOMAIN":
-            domain = parts[1].strip().lower()
+        if len(parts) != 2:
+            continue
+        prefix = parts[0].strip().upper()
+        if prefix not in ALLOWED_PREFIXES:
+            continue
+
+        val = parts[1].strip()
+        if prefix == "DOMAIN":
+            domain = val.lower()
             arr = domain.split(".")
             n = len(arr)
             found = False
@@ -219,9 +231,9 @@ def filter_domain_against_suffixes(others: Iterable[str], suffixes: Set[str]) ->
                     found = True
                     break
             if not found:
-                kept_others.add(line)
+                kept_others.add(f"DOMAIN,{domain}")
         else:
-            kept_others.add(line)
+            kept_others.add(f"{prefix},{val}")
 
     return kept_others
 
@@ -307,7 +319,8 @@ class ClashFilter(BaseFilter):
     """
     解析 Clash classical 规则文件（URL 或本地路径）
     提取 DOMAIN-SUFFIX,domain -> suffix
-    提取 DOMAIN, DOMAIN-KEYWORD, PROCESS-NAME, DOMAIN-REGEX -> others
+    提取 DOMAIN, DOMAIN-KEYWORD, DOMAIN-REGEX, REGEX -> others
+    严格忽略 PROCESS-NAME、IP-CIDR 等非目标类型
     """
     def __init__(self, sources: Union[str, List[str]],
                  extract_suffix: bool = True,
@@ -315,6 +328,7 @@ class ClashFilter(BaseFilter):
         self.sources = [sources] if isinstance(sources, str) else list(sources)
         self.extract_suffix = extract_suffix
         self.extract_other = extract_other
+        self.allowed_types = ("DOMAIN", "DOMAIN-KEYWORD", "DOMAIN-REGEX", "REGEX")
 
     def extract(self, context: BuildContext) -> Tuple[Set[str], Set[str]]:
         suffixes: Set[str] = set()
@@ -336,7 +350,7 @@ class ClashFilter(BaseFilter):
                 rule_type = parts[0].upper()
                 if rule_type == "DOMAIN-SUFFIX" and self.extract_suffix and len(parts) >= 2:
                     suffixes.add(parts[1].lower())
-                elif rule_type in ("DOMAIN", "DOMAIN-KEYWORD", "PROCESS-NAME", "DOMAIN-REGEX") and self.extract_other and len(parts) >= 2:
+                elif rule_type in self.allowed_types and self.extract_other and len(parts) >= 2:
                     others.add(f"{rule_type},{parts[1]}")
 
         return suffixes, others
@@ -346,14 +360,16 @@ class ClashYamlFilter(BaseFilter):
     """
     解析 Clash Provider YAML 列表（如 AI Suite.yaml 或 applications2 列表）
     提取 - DOMAIN-SUFFIX,domain -> suffix
-    提取 - DOMAIN,xxx / - DOMAIN-KEYWORD,xxx / - PROCESS-NAME,xxx -> others
+    提取 - DOMAIN,xxx / - DOMAIN-KEYWORD,xxx / - REGEX,xxx -> others
     """
     def __init__(self, source: str):
         self.source = source
+        self.allowed_types = ("DOMAIN", "DOMAIN-KEYWORD", "DOMAIN-REGEX", "REGEX")
 
     def extract(self, context: BuildContext) -> Tuple[Set[str], Set[str]]:
         suffixes: Set[str] = set()
         others: Set[str] = set()
+
         content = fetch_content(self.source, context)
         if not content:
             return suffixes, others
@@ -371,7 +387,7 @@ class ClashYamlFilter(BaseFilter):
             rule_type = parts[0].upper()
             if rule_type == "DOMAIN-SUFFIX" and len(parts) >= 2:
                 suffixes.add(parts[1].lower())
-            elif rule_type in ("DOMAIN", "DOMAIN-KEYWORD", "PROCESS-NAME", "DOMAIN-REGEX") and len(parts) >= 2:
+            elif rule_type in self.allowed_types and len(parts) >= 2:
                 others.add(f"{rule_type},{parts[1]}")
 
         return suffixes, others
