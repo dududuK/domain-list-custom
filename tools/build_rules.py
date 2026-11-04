@@ -670,8 +670,9 @@ class RoutingRule:
             cleaned_others = others
 
         # 4. 组装格式化行并去重排序
+        # 注意：DOMAIN-KEYWORD 不被 mihomo mrs domain behavior 支持，统一丢弃
         output_lines: List[str] = [f"DOMAIN-SUFFIX,{s}" for s in cleaned_suffixes]
-        output_lines.extend(cleaned_others)
+        output_lines.extend(line for line in cleaned_others if not line.upper().startswith("DOMAIN-KEYWORD,"))
 
         unique_lines = list(set(output_lines))
         unique_lines.sort(key=lambda x: x.lower())
