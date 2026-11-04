@@ -25,7 +25,7 @@ DEFAULT_ENV: Dict[str, str] = {
     "applications2": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/applications.txt",
     "apple_cn": "https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/apple.china.conf",
     "google_cn": "https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/google.china.conf",
-    "games_cn1": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/SteamCN/SteamCN.list",
+    "games_cn1": "https://magicrule.pages.dev/data/_shared/artifacts/GlobalGame_rules_d8c6da812d5e7f0b.list",
     "games_cn2": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/GameDownloadCN/GameDownloadCN.list",
     "netflix": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Netflix/Netflix.list",
     "disney": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Disney/Disney.list",
@@ -33,17 +33,17 @@ DEFAULT_ENV: Dict[str, str] = {
     "primevideo": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/PrimeVideo/PrimeVideo.list",
     "appletv": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/AppleTV/AppleTV.list",
     "youtube": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.list",
-    "tiktok": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/TikTok/TikTok.list",
+    "tiktok": "https://magicrule.pages.dev/data/_shared/artifacts/TikTok_rules_f1418ba5f368c034.list",
     "bilibili": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/BiliBili/BiliBili.list",
     "spotify": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Spotify/Spotify.list",
-    "media": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia.list",
-    "games1": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/Game.list",
-    "games2": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/GameDownload/GameDownload.list",
+    "media": "https://magicrule.pages.dev/data/_shared/artifacts/GlobalMedia_rules_cbbbcb6dca56af83.list",
+    "games1": "https://magicrule.pages.dev/data/_shared/artifacts/GlobalGame_rules_d8c6da812d5e7f0b.list",
+    "games2": "https://magicrule.pages.dev/data/_shared/artifacts/GameDownload_rules_99528f2898a794ff.list",
     "ai": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/AI.list",
-    "ai1": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.list",
-    "ai2": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Copilot/Copilot.list",
-    "ai3": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Gemini/Gemini.list",
-    "ai4": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Claude/Claude.list",
+    "ai1": "https://magicrule.pages.dev/data/_shared/artifacts/Gemini_rules_8da136e527c6fa11.list",
+    "ai2": "https://magicrule.pages.dev/data/_shared/artifacts/Copilot_rules_a253cdc8a666e0cb.list",
+    "ai3": "https://magicrule.pages.dev/data/_shared/artifacts/OpenAI_rules_f362ba1006ae0e0c.list",
+    "ai4": "https://magicrule.pages.dev/data/_shared/artifacts/Grok_rules_1686b96ebfe522d0.list",
     "ai5": "https://raw.githubusercontent.com/dler-io/Rules/refs/heads/main/Clash/Provider/AI%20Suite.yaml",
     "ai6": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-ai-chat-!cn.list",
     "ai7": "https://raw.githubusercontent.com/shangrenxi/Rules/refs/heads/master/rules/AI.list",
@@ -811,6 +811,18 @@ def get_default_registry() -> RuleRegistry:
         .add_filter(CommunityFilter("category-game-platforms-download.txt", tag="cn"))
         .add_filter(CommunityFilter("category-games-cn.txt"))
         .add_filter(ClashFilter(["games_cn1", "games_cn2"]))
+    )
+
+    # 10.1 steam-cn（Steam 中国区 CDN/下载，取自 v2fly steam 的 @cn 属性）
+    reg.register(
+        RoutingRule("steam-cn")
+        .add_filter(CommunityFilter("steam.txt", tag="cn"))
+    )
+
+    # 10.2 steam（Steam 商店/社区/海外 CDN，全量；配合 steam-cn 先匹配）
+    reg.register(
+        RoutingRule("steam")
+        .add_filter(CommunityFilter("steam.txt"))
     )
 
     # 11. games (剔除 games-cn)
