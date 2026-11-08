@@ -19,6 +19,7 @@ DEFAULT_ENV: Dict[str, str] = {
     "fakeip_filter": "https://raw.githubusercontent.com/DustinWin/ShellCrash/dev/public/fake_ip_filter.list",
     "private": "https://magicrule.pages.dev/data/_shared/artifacts/Lan_rules_a7096f98ad43c9dc.list",
     "ads": "https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-clash.yaml",
+    "ads1": "https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/Filters/AWAvenue-Ads-Rule-Clash-Classical.yaml",
     "trackerslist1": "https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt",
     "trackerslist2": "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt",
     "applications1": "https://magicrule.pages.dev/data/_shared/artifacts/Download_rules_45c9b3c4889075b6.list",
@@ -770,6 +771,7 @@ def get_default_registry() -> RuleRegistry:
     reg.register(
         RoutingRule("ads")
         .add_filter(AntiAdFilter("ads"))
+        .add_filter(ClashYamlFilter("ads1"))
     )
 
     # 5. trackerslist
